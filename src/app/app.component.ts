@@ -1,12 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './shared/navbar/navbar.component';
+import { FooterComponent } from './shared/footer/footer.component';
+import { ChatWidgetComponent } from './shared/chat-widget/chat-widget.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  standalone: true,
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, ChatWidgetComponent],
+  template: `
+    <app-navbar />
+    <main>
+      <router-outlet />
+    </main>
+    <app-footer />
+    <app-chat-widget />
+  `,
+  styles: [`
+    main {
+      min-height: calc(100vh - 140px);
+    }
+  `]
 })
-export class AppComponent {
-  title = 'indigo-frontend';
+export class AppComponent implements OnInit {
+  ngOnInit(): void {}
 }
