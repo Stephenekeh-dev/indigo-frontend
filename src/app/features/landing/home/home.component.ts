@@ -16,7 +16,7 @@ import { Post } from '../../../models/post.model';
     <!-- Hero -->
     <section class="hero">
       <div class="hero-content">
-        <div class="hero-badge">🦀 Rust Specialists</div>
+        <div class="hero-badge">🦀 Rust Specialists</div> 
         <h1>
           Build Faster.<br>
           <span class="gradient-text">Ship Safer.</span><br>
@@ -502,3 +502,4 @@ export class HomeComponent implements OnInit {
     return '$' + price;
   }
 }
+//<section class="section bg-white" [@scrollReveal]="servicesVisible ? 'visible' : 'hidden'" data-section="services">
