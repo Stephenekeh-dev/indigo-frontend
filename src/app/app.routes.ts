@@ -118,6 +118,27 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
+  // Blockchain
+{
+  path: 'blockchain',
+  loadComponent: () =>
+    import('./features/blockchain/blockchain-list/blockchain-list.component')
+      .then(m => m.BlockchainListComponent),
+},
+{
+  path: 'blockchain/:slug',
+  loadComponent: () =>
+    import('./features/blockchain/blockchain-detail/blockchain-detail.component')
+      .then(m => m.BlockchainDetailComponent),
+},
+{
+  path: 'shop/checkout',
+  loadComponent: () =>
+    import('./features/shop/checkout/checkout.component')
+      .then(m => m.CheckoutComponent),
+  canActivate: [AuthGuard],
+},
+
   // Wildcard
   { path: '**', redirectTo: '' },
 ];

@@ -44,9 +44,9 @@ import { CartItem } from '../../../models/product.model';
               <span>—</span>
             </div>
             <div class="summary-divider"></div>
-            <a routerLink="/auth/register" class="btn btn-primary btn-full">
-              Proceed to Checkout
-            </a>
+           <a routerLink="/shop/checkout" class="btn btn-primary btn-full">
+            Proceed to Checkout
+          </a>
           </div>
         </div>
       </div>

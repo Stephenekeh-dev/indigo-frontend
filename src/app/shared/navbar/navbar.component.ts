@@ -24,6 +24,7 @@ import { User } from '../../models/user.model';
           <li><a routerLink="/courses"  routerLinkActive="active">Courses</a></li>
           <li><a routerLink="/shop"     routerLinkActive="active">Shop</a></li>
           <li><a routerLink="/blog"     routerLinkActive="active">Blog</a></li>
+          <li><a routerLink="/blockchain" routerLinkActive="active">Blockchain</a></li>
           <li><a routerLink="/community" routerLinkActive="active">Community</a></li>
         </ul>
 
