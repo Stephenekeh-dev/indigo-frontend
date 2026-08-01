@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   // Landing
@@ -80,6 +81,13 @@ export const routes: Routes = [
         .then(m => m.CartComponent),
     canActivate: [AuthGuard],
   },
+  {
+    path: 'shop/checkout',
+    loadComponent: () =>
+      import('./features/shop/checkout/checkout.component')
+        .then(m => m.CheckoutComponent),
+    canActivate: [AuthGuard],
+  },
 
   // Blog
   {
@@ -109,6 +117,20 @@ export const routes: Routes = [
         .then(m => m.EventDetailComponent),
   },
 
+  // Blockchain
+  {
+    path: 'blockchain',
+    loadComponent: () =>
+      import('./features/blockchain/blockchain-list/blockchain-list.component')
+        .then(m => m.BlockchainListComponent),
+  },
+  {
+    path: 'blockchain/:slug',
+    loadComponent: () =>
+      import('./features/blockchain/blockchain-detail/blockchain-detail.component')
+        .then(m => m.BlockchainDetailComponent),
+  },
+
   // Dashboard (protected)
   {
     path: 'dashboard',
@@ -118,27 +140,46 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
-  // Blockchain
-{
-  path: 'blockchain',
-  loadComponent: () =>
-    import('./features/blockchain/blockchain-list/blockchain-list.component')
-      .then(m => m.BlockchainListComponent),
-},
-{
-  path: 'blockchain/:slug',
-  loadComponent: () =>
-    import('./features/blockchain/blockchain-detail/blockchain-detail.component')
-      .then(m => m.BlockchainDetailComponent),
-},
-{
-  path: 'shop/checkout',
-  loadComponent: () =>
-    import('./features/shop/checkout/checkout.component')
-      .then(m => m.CheckoutComponent),
-  canActivate: [AuthGuard],
-},
+  // Admin (protected — admin role only)
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/admin-layout/admin-layout.component')
+        .then(m => m.AdminLayoutComponent),
+    canActivate: [AdminGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'services',
+        pathMatch: 'full'
+      },
+      {
+        path: 'services',
+        loadComponent: () =>
+          import('./features/admin/admin-services/admin-services.component')
+            .then(m => m.AdminServicesComponent),
+      },
+      {
+        path: 'courses',
+        loadComponent: () =>
+          import('./features/admin/admin-courses/admin-courses.component')
+            .then(m => m.AdminCoursesComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin/admin-users/admin-users.component')
+            .then(m => m.AdminUsersComponent),
+      },
+      {
+        path: 'bookings',
+        loadComponent: () =>
+          import('./features/admin/admin-bookings/admin-bookings.component')
+            .then(m => m.AdminBookingsComponent),
+      },
+    ]
+  },
 
-  // Wildcard
+  // Wildcard — must be last
   { path: '**', redirectTo: '' },
 ];

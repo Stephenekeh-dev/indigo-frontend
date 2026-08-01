@@ -243,12 +243,14 @@ import { AiChatService, ChatMessage } from '../../services/ai-chat.service';
       flex-shrink: 0;
     }
     .bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
     .message.user .bubble {
       background: linear-gradient(135deg, #4f46e5, #7c3aed);
       color: #fff;

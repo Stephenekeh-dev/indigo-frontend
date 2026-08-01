@@ -11,16 +11,17 @@ import {
 })
 export class AuthService {
 
-  private currentUserSubject = new BehaviorSubject<User | null>(
-    this.loadUser()
-  );
-
-  currentUser$ = this.currentUserSubject.asObservable();
+  private currentUserSubject: BehaviorSubject<User | null>;
+  currentUser$: Observable<User | null>;
 
   constructor(
-    private api: ApiService,
+    private api:    ApiService,
     private router: Router
-  ) {}
+  ) {
+    const stored = this.loadUser();
+    this.currentUserSubject = new BehaviorSubject<User | null>(stored);
+    this.currentUser$       = this.currentUserSubject.asObservable();
+  }
 
   get currentUser(): User | null {
     return this.currentUserSubject.value;
@@ -52,16 +53,16 @@ export class AuthService {
   }
 
   logout(): void {
-    const refresh_token = localStorage.getItem('indigo_refresh_token');
-    if (refresh_token) {
-      this.api.post('auth/logout', { refresh_token }).subscribe();
-    }
-    localStorage.removeItem('indigo_token');
-    localStorage.removeItem('indigo_refresh_token');
-    localStorage.removeItem('indigo_user');
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/']);
+  const refresh_token = localStorage.getItem('indigo_refresh_token');
+  if (refresh_token) {
+    this.api.post('auth/logout', { refresh_token }).subscribe();
   }
+  localStorage.removeItem('indigo_token');
+  localStorage.removeItem('indigo_refresh_token');
+  localStorage.removeItem('indigo_user');
+  this.currentUserSubject.next(null);
+  this.router.navigate(['/']);
+}
 
   me(): Observable<User> {
     return this.api.get<User>('auth/me').pipe(
@@ -82,6 +83,11 @@ export class AuthService {
   private loadUser(): User | null {
     const raw = localStorage.getItem('indigo_user');
     if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
+    try { 
+      return JSON.parse(raw); 
+    } catch { 
+      return null; 
+    }
   }
+  
 }

@@ -34,6 +34,9 @@ import { User } from '../../models/user.model';
             <a routerLink="/dashboard" class="btn btn-ghost">
               {{ currentUser.full_name.split(' ')[0] }}
             </a>
+            <a routerLink="/admin" class="btn btn-ghost" *ngIf="currentUser?.role === 'admin'">
+            Admin
+          </a>
             <button class="btn btn-outline" (click)="logout()">Logout</button>
           </ng-container>
           <ng-template #guestLinks>
