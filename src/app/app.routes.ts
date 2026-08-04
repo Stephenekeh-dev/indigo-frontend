@@ -177,6 +177,12 @@ export const routes: Routes = [
           import('./features/admin/admin-bookings/admin-bookings.component')
             .then(m => m.AdminBookingsComponent),
       },
+            {
+        path: 'media',
+        loadComponent: () =>
+          import('./features/admin/admin-media/admin-media.component')
+            .then(m => m.AdminMediaComponent),
+      },
     ]
   },
 

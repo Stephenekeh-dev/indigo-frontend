@@ -2,157 +2,126 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
-import { ServiceListing } from '../../../models/service.model';
 
 @Component({
-  selector: 'app-admin-services',
+  selector: 'app-admin-media',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="admin-page">
       <div class="page-head">
         <div>
-          <h1>Services</h1>
-          <p>Manage consulting service listings</p>
+          <h1>Blog Posts</h1>
+          <p>Create, edit, and manage blog content</p>
         </div>
         <button class="btn btn-primary" (click)="openCreateForm()">
-          + Add Service
+          + New Post
         </button>
       </div>
 
       <!-- Create / Edit form -->
       <div class="form-card" *ngIf="showForm">
-        <h2>{{ editingId ? 'Edit Service' : 'New Service' }}</h2>
+        <h2>{{ editingSlug ? 'Edit Post' : 'New Post' }}</h2>
         <div class="form-grid">
-          <div class="field">
+          <div class="field full">
             <label>Title *</label>
-            <input
-              type="text"
-              [(ngModel)]="form.title"
-              placeholder="e.g. Rust Migration Consulting"
-            />
+            <input type="text" [(ngModel)]="form.title" placeholder="Post title" />
           </div>
           <div class="field">
-            <label>Service Type *</label>
-            <select [(ngModel)]="form.service_type">
-              <option value="migration">Migration</option>
-              <option value="custom_app">Custom App</option>
-              <option value="code_review">Code Review</option>
-              <option value="general_consulting">General Consulting</option>
-              <option value="retainer">Retainer</option>
-              <option value="blockchain_consulting">Blockchain Consulting</option>
+            <label>Category *</label>
+            <select [(ngModel)]="form.category">
+              <option value="rust_basics">Rust Basics</option>
+              <option value="tutorial">Tutorial</option>
+              <option value="news">News</option>
+              <option value="blockchain">Blockchain</option>
+              <option value="career">Career</option>
             </select>
           </div>
           <div class="field">
-            <label>Price (USD/hr) *</label>
-            <input type="number" [(ngModel)]="form.price_usd" placeholder="150" />
-          </div>
-          <div class="field">
-            <label>Duration (hours)</label>
-            <input type="number" [(ngModel)]="form.duration_hours" placeholder="1" />
-          </div>
-          <div class="field full">
-            <label>Short Description</label>
-            <input
-              type="text"
-              [(ngModel)]="form.short_desc"
-              placeholder="One line summary"
-            />
-          </div>
-          <div class="field full">
-            <label>Full Description *</label>
-            <textarea
-              [(ngModel)]="form.description"
-              rows="4"
-              placeholder="Detailed description..."
-            ></textarea>
-          </div>
-          <div class="field">
-            <label>Active?</label>
-            <select [(ngModel)]="form.is_active">
-              <option [ngValue]="true">Yes — visible to clients</option>
-              <option [ngValue]="false">No — hidden</option>
+            <label>Status</label>
+            <select [(ngModel)]="form.status">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
             </select>
+          </div>
+          <div class="field full">
+            <label>Excerpt</label>
+            <input type="text" [(ngModel)]="form.excerpt" placeholder="Short summary shown in listings" />
+          </div>
+          <div class="field full">
+            <label>Content *</label>
+            <textarea [(ngModel)]="form.content" rows="12" placeholder="Write your post content here..."></textarea>
+          </div>
+          <div class="field full">
+            <label>Tags (comma separated)</label>
+            <input type="text" [(ngModel)]="form.tags_input" placeholder="rust, async, tutorial" />
           </div>
         </div>
         <div class="form-actions">
           <button class="btn btn-ghost" (click)="cancelForm()">Cancel</button>
           <div class="success-msg" *ngIf="formSuccess">
-            ✅ Service {{ editingId ? 'updated' : 'created' }} successfully!
+            ✅ Post {{ editingSlug ? 'updated' : 'published' }}!
           </div>
           <div class="error-msg" *ngIf="formError">{{ formError }}</div>
-          <button
-            class="btn btn-primary"
-            (click)="submitForm()"
-            [disabled]="saving"
-          >
-            {{ saving ? 'Saving...' : (editingId ? 'Update Service' : 'Create Service') }}
+          <button class="btn btn-primary" (click)="submitForm()" [disabled]="saving">
+            {{ saving ? 'Saving...' : (editingSlug ? 'Update Post' : 'Publish Post') }}
           </button>
         </div>
       </div>
 
-      <!-- Delete confirmation modal -->
-      <div class="modal-overlay" *ngIf="deletingId">
+      <!-- Delete modal -->
+      <div class="modal-overlay" *ngIf="deletingSlug">
         <div class="modal">
-          <h3>Delete Service?</h3>
-          <p>
-            Are you sure you want to delete
-            <strong>{{ getServiceTitle(deletingId) }}</strong>?
-            This cannot be undone.
-          </p>
+          <h3>Delete Post?</h3>
+          <p>Are you sure you want to delete <strong>{{ getPostTitle(deletingSlug) }}</strong>? This cannot be undone.</p>
           <div class="modal-actions">
-            <button class="btn btn-ghost" (click)="deletingId = null">Cancel</button>
-            <button
-              class="btn btn-danger"
-              (click)="confirmDelete()"
-              [disabled]="deleting"
-            >
+            <button class="btn btn-ghost" (click)="deletingSlug = null">Cancel</button>
+            <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="deleting">
               {{ deleting ? 'Deleting...' : 'Yes, Delete' }}
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Services table -->
+      <!-- Posts table -->
       <div class="data-card">
-        <div class="loading" *ngIf="loading">Loading services...</div>
+        <div class="loading" *ngIf="loading">Loading posts...</div>
         <table class="data-table" *ngIf="!loading">
           <thead>
             <tr>
               <th>Title</th>
-              <th>Type</th>
-              <th>Price</th>
-              <th>Duration</th>
+              <th>Category</th>
               <th>Status</th>
+              <th>Views</th>
+              <th>Likes</th>
+              <th>Published</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let s of services">
+            <tr *ngFor="let p of posts">
               <td>
-                <strong>{{ s.title }}</strong>
-                <small>{{ s.short_desc }}</small>
+                <strong>{{ p.title }}</strong>
+                <small>{{ p.excerpt?.slice(0,60) }}</small>
               </td>
               <td>
-                <span class="type-badge">
-                  {{ s.service_type.replace('_',' ') }}
-                </span>
+                <span class="cat-badge">{{ p.category.replace('_',' ') }}</span>
               </td>
-              <td class="price">{{ formatPrice(s.price_usd) }}/hr</td>
-              <td>{{ s.duration_hours ? s.duration_hours + 'h' : '—' }}</td>
               <td>
-                <span class="status-dot active"   *ngIf="s.is_active">Active</span>
-                <span class="status-dot inactive" *ngIf="!s.is_active">Inactive</span>
+                <span class="status-dot" [class]="p.status">{{ p.status }}</span>
               </td>
+              <td>{{ p.view_count || 0 }}</td>
+              <td>{{ p.likes_count || 0 }}</td>
+              <td>{{ p.published_at ? (p.published_at | date:'MMM d, y') : '—' }}</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon edit"   (click)="openEditForm(s)">✏️ Edit</button>
-                  <button class="btn-icon delete" (click)="promptDelete(s.id)">🗑 Delete</button>
+                  <button class="btn-icon edit"   (click)="openEditForm(p)">✏️ Edit</button>
+                  <button class="btn-icon delete" (click)="promptDelete(p.slug)">🗑 Delete</button>
                 </div>
               </td>
             </tr>
-            <tr *ngIf="services.length === 0">
-              <td colspan="6" class="empty-row">No services found</td>
+            <tr *ngIf="posts.length === 0">
+              <td colspan="7" class="empty-row">No posts yet — create your first one</td>
             </tr>
           </tbody>
         </table>
@@ -168,7 +137,6 @@ import { ServiceListing } from '../../../models/service.model';
     .page-head h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
     .page-head p  { font-size: 14px; color: #64748b; margin: 0; }
 
-    /* Form */
     .form-card {
       background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
       padding: 24px; margin-bottom: 24px;
@@ -190,17 +158,13 @@ import { ServiceListing } from '../../../models/service.model';
     }
     input:focus, select:focus, textarea:focus { border-color: #4f46e5; }
     textarea { resize: vertical; }
-    .form-actions {
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    }
+    .form-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .success-msg { font-size: 14px; color: #15803d; font-weight: 500; }
     .error-msg   { font-size: 14px; color: #b91c1c; }
 
-    /* Modal */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
     }
     .modal {
       background: #fff; border-radius: 16px; padding: 32px;
@@ -210,10 +174,8 @@ import { ServiceListing } from '../../../models/service.model';
     .modal p  { font-size: 14px; color: #64748b; margin: 0 0 24px; line-height: 1.6; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
-    /* Table */
     .data-card {
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
-      overflow: hidden;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden;
     }
     .loading { padding: 48px; text-align: center; color: #64748b; }
     .data-table { width: 100%; border-collapse: collapse; }
@@ -230,28 +192,17 @@ import { ServiceListing } from '../../../models/service.model';
     .data-table tr:last-child td { border-bottom: none; }
     .data-table td strong { display: block; font-weight: 600; color: #0f172a; }
     .data-table td small  { font-size: 12px; color: #94a3b8; }
-    .price { font-weight: 700; color: #4f46e5 !important; }
-    .empty-row {
-      text-align: center; color: #94a3b8; padding: 32px !important;
-    }
-    .type-badge {
+    .empty-row { text-align: center; color: #94a3b8; padding: 32px !important; }
+
+    .cat-badge {
       padding: 3px 10px; border-radius: 20px; font-size: 12px;
       font-weight: 600; background: #ede9fe; color: #4f46e5;
-      text-transform: capitalize; white-space: nowrap;
+      text-transform: capitalize;
     }
-    .status-dot {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 12px; font-weight: 600;
-    }
-    .status-dot::before {
-      content: ''; width: 7px; height: 7px; border-radius: 50%;
-    }
-    .status-dot.active::before   { background: #10b981; }
-    .status-dot.inactive::before { background: #ef4444; }
-    .status-dot.active   { color: #15803d; }
-    .status-dot.inactive { color: #b91c1c; }
+    .status-dot { font-size: 12px; font-weight: 600; text-transform: capitalize; }
+    .status-dot.published { color: #15803d; }
+    .status-dot.draft     { color: #94a3b8; }
 
-    /* Action buttons */
     .action-btns { display: flex; gap: 6px; }
     .btn-icon {
       padding: 5px 10px; border-radius: 6px; font-size: 12px;
@@ -262,7 +213,6 @@ import { ServiceListing } from '../../../models/service.model';
     .btn-icon.delete { background: #fee2e2; color: #b91c1c; }
     .btn-icon.delete:hover { background: #fecaca; }
 
-    /* Buttons */
     .btn {
       padding: 10px 20px; border-radius: 8px; font-size: 14px;
       font-weight: 700; border: none; cursor: pointer; transition: all 0.2s;
@@ -277,62 +227,59 @@ import { ServiceListing } from '../../../models/service.model';
     .btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
   `]
 })
-export class AdminServicesComponent implements OnInit {
-  services:    ServiceListing[] = [];
-  loading      = true;
-  showForm     = false;
-  editingId:   string | null = null;
-  deletingId:  string | null = null;
-  saving       = false;
-  deleting     = false;
-  formSuccess  = false;
-  formError    = '';
+export class AdminMediaComponent implements OnInit {
+  posts:        any[]         = [];
+  loading       = true;
+  showForm      = false;
+  editingSlug:  string | null = null;
+  deletingSlug: string | null = null;
+  saving        = false;
+  deleting      = false;
+  formSuccess   = false;
+  formError     = '';
 
   form = {
-    title:          '',
-    description:    '',
-    short_desc:     '',
-    service_type:   'general_consulting',
-    price_usd:      100,
-    duration_hours: 1,
-    is_active:      true,
+    title:      '',
+    content:    '',
+    excerpt:    '',
+    category:   'rust_basics',
+    status:     'draft',
+    tags_input: '',
   };
 
   constructor(private adminService: AdminService) {}
 
   ngOnInit(): void {
-    this.loadServices();
+    this.loadPosts();
   }
 
-  loadServices(): void {
-    this.adminService.listServices().subscribe({
-      next: data => { this.services = data; this.loading = false; },
+  loadPosts(): void {
+    this.adminService.listAllPosts().subscribe({
+      next: data => { this.posts = data; this.loading = false; },
       error: ()   => { this.loading = false; }
     });
   }
 
   openCreateForm(): void {
-    this.editingId = null;
+    this.editingSlug = null;
     this.form = {
-      title: '', description: '', short_desc: '',
-      service_type: 'general_consulting', price_usd: 100,
-      duration_hours: 1, is_active: true,
+      title: '', content: '', excerpt: '',
+      category: 'rust_basics', status: 'draft', tags_input: ''
     };
     this.formSuccess = false;
     this.formError   = '';
     this.showForm    = true;
   }
 
-  openEditForm(s: ServiceListing): void {
-    this.editingId = s.id;
+  openEditForm(p: any): void {
+    this.editingSlug = p.slug;
     this.form = {
-      title:          s.title,
-      description:    s.description,
-      short_desc:     s.short_desc || '',
-      service_type:   s.service_type,
-      price_usd:      s.price_usd,
-      duration_hours: s.duration_hours || 1,
-      is_active:      s.is_active,
+      title:      p.title,
+      content:    p.content,
+      excerpt:    p.excerpt || '',
+      category:   p.category,
+      status:     p.status,
+      tags_input: (p.tags || []).join(', '),
     };
     this.formSuccess = false;
     this.formError   = '';
@@ -342,26 +289,38 @@ export class AdminServicesComponent implements OnInit {
 
   cancelForm(): void {
     this.showForm    = false;
-    this.editingId   = null;
+    this.editingSlug = null;
     this.formError   = '';
     this.formSuccess = false;
   }
 
   submitForm(): void {
-    if (!this.form.title || !this.form.description) return;
-    this.saving     = true;
-    this.formError  = '';
+    if (!this.form.title || !this.form.content) return;
+    this.saving      = true;
+    this.formError   = '';
     this.formSuccess = false;
 
-    if (this.editingId) {
-      this.adminService.updateService(this.editingId, this.form).subscribe({
+    const tags = this.form.tags_input
+      .split(',').map(t => t.trim()).filter(Boolean);
+
+    const payload = {
+      title:    this.form.title,
+      content:  this.form.content,
+      excerpt:  this.form.excerpt,
+      category: this.form.category,
+      status:   this.form.status,
+      tags,
+    };
+
+    if (this.editingSlug) {
+      this.adminService.updatePost(this.editingSlug, payload).subscribe({
         next: updated => {
-          const idx = this.services.findIndex(s => s.id === this.editingId);
-          if (idx !== -1) this.services[idx] = updated;
+          const idx = this.posts.findIndex(p => p.slug === this.editingSlug);
+          if (idx !== -1) this.posts[idx] = updated;
           this.saving      = false;
           this.formSuccess = true;
           this.showForm    = false;
-          this.editingId   = null;
+          this.editingSlug = null;
           setTimeout(() => this.formSuccess = false, 3000);
         },
         error: e => {
@@ -370,9 +329,9 @@ export class AdminServicesComponent implements OnInit {
         }
       });
     } else {
-      this.adminService.createService(this.form).subscribe({
+      this.adminService.createPost(payload).subscribe({
         next: created => {
-          this.services.unshift(created);
+          this.posts.unshift(created);
           this.saving      = false;
           this.formSuccess = true;
           this.showForm    = false;
@@ -386,32 +345,30 @@ export class AdminServicesComponent implements OnInit {
     }
   }
 
-  promptDelete(id: string): void {
-    this.deletingId = id;
+  promptDelete(slug: string): void {
+    this.deletingSlug = slug;
   }
 
   confirmDelete(): void {
-    if (!this.deletingId) return;
+    if (!this.deletingSlug) return;
     this.deleting = true;
 
-    this.adminService.deleteService(this.deletingId).subscribe({
+    this.adminService.deletePost(this.deletingSlug).subscribe({
       next: () => {
-        this.services  = this.services.filter(s => s.id !== this.deletingId);
-        this.deletingId = null;
-        this.deleting   = false;
+        this.posts        = this.posts.filter(p => p.slug !== this.deletingSlug);
+        this.deletingSlug = null;
+        this.deleting     = false;
       },
       error: e => {
         console.error('Delete failed', e);
-        this.deleting   = false;
-        this.deletingId = null;
+        this.deleting     = false;
+        this.deletingSlug = null;
       }
     });
   }
 
-  getServiceTitle(id: string | null): string {
-    if (!id) return '';
-    return this.services.find(s => s.id === id)?.title || '';
+  getPostTitle(slug: string | null): string {
+    if (!slug) return '';
+    return this.posts.find(p => p.slug === slug)?.title || '';
   }
-
-  formatPrice(price: number): string { return '$' + price; }
 }

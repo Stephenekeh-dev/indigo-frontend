@@ -51,4 +51,37 @@ export class AdminService {
   listUsers(): Observable<User[]> {
     return this.api.get<User[]>('auth/users');
   }
+  // Services
+updateService(id: string, dto: Partial<ServiceListing>): Observable<ServiceListing> {
+  return this.api.patch<ServiceListing>(`services/${id}`, dto);
+}
+
+deleteService(id: string): Observable<void> {
+  return this.api.delete<void>(`services/${id}`);
+}
+
+// Courses
+updateCourse(id: string, dto: any): Observable<Course> {
+  return this.api.patch<Course>(`education/${id}`, dto);
+}
+
+deleteCourse(id: string): Observable<void> {
+  return this.api.delete<void>(`education/${id}`);
+}
+// Media / Blog
+listAllPosts(): Observable<any[]> {
+  return this.api.get<any[]>('media/posts/all');
+}
+
+createPost(dto: any): Observable<any> {
+  return this.api.post<any>('media/posts', dto);
+}
+
+updatePost(slug: string, dto: any): Observable<any> {
+  return this.api.put<any>(`media/posts/${slug}`, dto);
+}
+
+deletePost(slug: string): Observable<void> {
+  return this.api.delete<void>(`media/posts/${slug}`);
+}
 }
