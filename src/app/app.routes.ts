@@ -183,6 +183,12 @@ export const routes: Routes = [
           import('./features/admin/admin-media/admin-media.component')
             .then(m => m.AdminMediaComponent),
       },
+      {
+  path: 'shop',
+  loadComponent: () =>
+    import('./features/admin/admin-shop/admin-shop.component')
+      .then(m => m.AdminShopComponent),
+},
     ]
   },
 

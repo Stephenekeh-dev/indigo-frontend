@@ -5,9 +5,11 @@ export interface Product {
   description:   string;
   short_desc:    string | null;
   product_type:  string;
+  status:        string;        // ← add this line
   price_usd:     number;
   compare_price: number | null;
   is_digital:    boolean;
+  download_url:  string | null;
   thumbnail_url: string | null;
   tags:          string[] | null;
   stock_count:   number | null;

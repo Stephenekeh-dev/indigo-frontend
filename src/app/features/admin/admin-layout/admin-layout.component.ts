@@ -43,6 +43,11 @@ import { AuthService } from '../../../services/auth.service';
             class="nav-item">
             📝 Blog Posts
           </a>
+                  <a routerLink="/admin/shop"
+          routerLinkActive="active"
+          class="nav-item">
+          🛒 Shop
+        </a>
         </nav>
 
         <div class="admin-footer-links">

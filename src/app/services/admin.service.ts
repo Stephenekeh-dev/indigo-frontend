@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 import { ServiceListing } from '../models/service.model';
 import { Course } from '../models/course.model';
 import { User } from '../models/user.model';
+import { Product } from '../models/product.model';
 
 export interface AdminStats {
   total_users:    number;
@@ -53,17 +54,17 @@ export class AdminService {
   }
   // Services
 updateService(id: string, dto: Partial<ServiceListing>): Observable<ServiceListing> {
-  return this.api.patch<ServiceListing>(`services/${id}`, dto);
+  return this.api.put<ServiceListing>(`services/${id}`, dto);
 }
-
 deleteService(id: string): Observable<void> {
   return this.api.delete<void>(`services/${id}`);
 }
 
 // Courses
 updateCourse(id: string, dto: any): Observable<Course> {
-  return this.api.patch<Course>(`education/${id}`, dto);
+  return this.api.put<Course>(`education/${id}`, dto);
 }
+
 
 deleteCourse(id: string): Observable<void> {
   return this.api.delete<void>(`education/${id}`);
@@ -84,4 +85,22 @@ updatePost(slug: string, dto: any): Observable<any> {
 deletePost(slug: string): Observable<void> {
   return this.api.delete<void>(`media/posts/${slug}`);
 }
+
+// Shop
+listProducts(): Observable<Product[]> {
+  return this.api.get<Product[]>('commerce/products');
 }
+
+createProduct(dto: any): Observable<Product> {
+  return this.api.post<Product>('commerce/products', dto);
+}
+
+updateProduct(id: string, dto: any): Observable<Product> {
+  return this.api.put<Product>(`commerce/products/${id}`, dto);
+}
+
+deleteProduct(id: string): Observable<void> {
+  return this.api.delete<void>(`commerce/products/${id}`);
+}
+}
+
