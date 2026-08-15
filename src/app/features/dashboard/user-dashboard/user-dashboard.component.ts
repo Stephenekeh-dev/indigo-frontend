@@ -263,11 +263,9 @@ import { Order } from '../../../models/product.model';
                 <span class="status-pill" [class]="b.status">{{ b.status }}</span>
               </span>
               <span class="cell">
-  <a *ngIf="b.zoom_join_url"
-   [href]="b.zoom_join_url"
-   target="_blank"
-   class="zoom-btn">Join ↗</a>
-
+  <a *ngIf="b.zoom_join_url" [href]="b.zoom_join_url" target="_blank" class="meet-btn">
+  Join Meet ↗
+</a>
                 <span *ngIf="!b.zoom_join_url" class="no-zoom">Pending</span>
               </span>
             </div>
@@ -593,12 +591,12 @@ import { Order } from '../../../models/product.model';
     .cell-icon { font-size: 18px; }
     .price { font-weight: 700; color: #4f46e5; }
 
-    .zoom-btn {
+    .meet-btn {
       padding: 4px 12px; background: #2563eb; color: #fff;
       border-radius: 6px; font-size: 12px; font-weight: 700;
       text-decoration: none; transition: background 0.2s;
     }
-    .zoom-btn:hover { background: #1d4ed8; }
+    .meet-btn:hover { background: #1557b0; }
     .no-zoom { font-size: 12px; color: #94a3b8; }
 
     /* ── Status pills ─────────────────────────── */

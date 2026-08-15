@@ -77,7 +77,7 @@ import { ServiceListing } from '../../../models/service.model';
           </div>
           <div class="summary-item">
             <span class="si-label">Format</span>
-            <span class="si-value">Zoom call</span>
+            <span class="si-value">Google Meet</span>
           </div>
           <div class="summary-divider"></div>
           <p class="summary-note">

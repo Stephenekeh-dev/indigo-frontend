@@ -5,6 +5,7 @@ import { ShopService } from '../../../services/shop.service';
 import { PaymentService } from '../../../services/payment.service';
 import { AuthService } from '../../../services/auth.service';
 import { CartItem } from '../../../models/product.model';
+import { CoursesService } from '../../../services/courses.service';
 
 @Component({
   selector: 'app-checkout',
@@ -250,37 +251,51 @@ export class CheckoutComponent implements OnInit {
     private authService:    AuthService,
     private route:          ActivatedRoute,
     private router:         Router,
+    private coursesService: CoursesService
   ) {}
 
   ngOnInit(): void {
-    // Check if returning from Paystack with a reference
-    const reference = this.route.snapshot.queryParamMap.get('reference') ||
-                      this.route.snapshot.queryParamMap.get('trxref');
+  const reference = this.route.snapshot.queryParamMap.get('reference') ||
+                    this.route.snapshot.queryParamMap.get('trxref');
 
-    if (reference) {
-      this.loading = true;
-      this.paymentService.verify(reference).subscribe({
-        next: result => {
-          this.loading        = false;
-          this.verifyResult   = result;
-          this.paymentSuccess = result.paid;
-          if (!result.paid) {
-            this.paymentError = 'Payment was not completed. Please try again.';
+  if (reference) {
+    this.loading = true;
+    this.paymentService.verify(reference).subscribe({
+      next: result => {
+        this.verifyResult   = result;
+        this.paymentSuccess = result.paid;
+        this.loading        = false;
+
+        if (result.paid) {
+          // If this was a course payment — enroll now
+          const pendingCourseId = localStorage.getItem('pending_course_id');
+          if (pendingCourseId) {
+            localStorage.removeItem('pending_course_id');
+            localStorage.removeItem('pending_course_slug');
+            this.coursesService.enroll(pendingCourseId, reference).subscribe({
+              next: () => console.log('Enrolled after payment'),
+              error: (err) => {
+                if (err.status === 409) console.log('Already enrolled');
+              }
+            });
           }
-        },
-        error: () => {
-          this.loading      = false;
-          this.paymentError = 'Could not verify payment. Please contact support.';
+        } else {
+          this.paymentError = 'Payment not completed. Please try again.';
         }
-      });
-      return;
-    }
-
-    this.shopService.getCart().subscribe({
-      next: data => { this.items = data; this.loading = false; },
-      error: ()   => { this.loading = false; }
+      },
+      error: () => {
+        this.loading      = false;
+        this.paymentError = 'Could not verify payment. Please contact support.';
+      }
     });
+    return;
   }
+
+  this.shopService.getCart().subscribe({
+    next: data => { this.items = data; this.loading = false; },
+    error: ()   => { this.loading = false; }
+  });
+}
 
   initiatePayment(): void {
     const user = this.authService.currentUser;

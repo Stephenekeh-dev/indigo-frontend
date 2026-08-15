@@ -61,10 +61,9 @@ import { BookingService } from '../../../services/booking.service';
                 <span class="status-pill" [class]="b.status">{{ b.status }}</span>
               </td>
               <td>
-                <a *ngIf="b.zoom_join_url"
-                   [href]="b.zoom_join_url"
-                   target="_blank"
-                   class="zoom-btn">Join ↗</a>
+               <a *ngIf="b.zoom_join_url" [href]="b.zoom_join_url" target="_blank" class="zoom-btn">
+                Meet ↗
+              </a>
                 <span *ngIf="!b.zoom_join_url" class="no-zoom">—</span>
               </td>
               <td>

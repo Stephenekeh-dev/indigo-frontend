@@ -57,3 +57,61 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+
+
+User@Steven-PC2 MINGW64 ~/Desktop/indigo-backend (main)
+
+$ grep "lettre" Cargo.toml
+
+lettre = { version = "0.11", features = ["tokio1", "tokio1-native-tls"] }
+
+User@Steven-PC2 MINGW64 ~/Desktop/indigo-backend (main)
+
+$ DATABASE_URL="postgres://postgres:1234567Steven..,@localhost:5432/indigo" cargo check 2>&1 | grep "^error" | head -20
+
+User@Steven-PC2 MINGW64 ~/Desktop/indigo-backend (main)
+
+$ 
+
+
+
+enroll(): void {
+  if (!this.isLoggedIn) {
+    this.router.navigate(['/auth/login']);
+    return;
+  }
+  if (!this.course) return;
+
+  // Free courses enroll directly
+  if (this.course.is_free || this.course.price_usd === 0) {
+    this.enrolling = true;
+    this.coursesService.enroll(this.course.id).subscribe({
+      next: () => { this.enrolled = true; this.enrolling = false; },
+      error: () => { this.enrolling = false; }
+    });
+    return;
+  }
+
+  // Paid courses go through Paystack
+  const user = this.authService.currentUser;
+  if (!user) return;
+
+  this.enrolling = true;
+  this.paymentService.initialize(
+    user.email,
+    this.course.price_usd,
+    'course',
+    this.course.id,
+  ).subscribe({
+    next: result => {
+      // Store course ID so we can enroll after payment
+      localStorage.setItem('pending_course_id', this.course!.id);
+      window.location.href = result.authorization_url;
+    },
+    error: () => { this.enrolling = false; }
+  });
+}
+
+

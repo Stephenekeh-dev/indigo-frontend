@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { CoursesService } from '../../../services/courses.service';
 import { AuthService } from '../../../services/auth.service';
+import { PaymentService } from '../../../services/payment.service';
 import { Course } from '../../../models/course.model';
 
 @Component({
@@ -28,21 +29,16 @@ import { Course } from '../../../models/course.model';
             <div class="header-meta">
               <span>📹 {{ course.total_lessons }} lessons</span>
               <span>⏱ {{ formatDuration(course.total_duration_mins) }}</span>
-              <span *ngIf="course.tags && course.tags.length">
-                🏷 {{ course.tags.join(', ') }}
-              </span>
             </div>
           </div>
         </div>
 
         <div class="course-body">
           <div class="course-main">
-            <div class="what-youll-learn">
-              <h2>What you'll learn</h2>
-              <div class="learn-grid">
-                <div class="learn-item" *ngFor="let item of learnItems">
-                  <span>✓</span> {{ item }}
-                </div>
+            <h2>What you will learn</h2>
+            <div class="learn-grid">
+              <div class="learn-item" *ngFor="let item of learnItems">
+                <span>✓</span> {{ item }}
               </div>
             </div>
 
@@ -71,8 +67,9 @@ import { Course } from '../../../models/course.model';
                 <li>✓ Community support</li>
               </ul>
 
+              <!-- Already enrolled -->
               <div class="success-box" *ngIf="enrolled">
-                ✅ Enrolled! Start learning now.
+                ✅ You are enrolled! Start learning now.
                 <br><br>
                 <a [routerLink]="['/courses', course.slug, 'learn']"
                    class="btn btn-primary btn-full">
@@ -80,14 +77,28 @@ import { Course } from '../../../models/course.model';
                 </a>
               </div>
 
+              <!-- Not enrolled -->
               <ng-container *ngIf="!enrolled">
+                <!-- Free course -->
                 <button
+                  *ngIf="course.is_free || course.price_usd === 0"
                   class="btn btn-primary btn-full"
                   [disabled]="enrolling"
-                  (click)="enroll()"
+                  (click)="enrollFree()"
                 >
-                  {{ enrolling ? 'Enrolling...' : (course.is_free ? 'Enroll for free' : 'Enroll now') }}
+                  {{ enrolling ? 'Enrolling...' : 'Enroll for free' }}
                 </button>
+
+                <!-- Paid course -->
+                <button
+                  *ngIf="!course.is_free && course.price_usd > 0"
+                  class="btn btn-primary btn-full"
+                  [disabled]="enrolling"
+                  (click)="enrollPaid()"
+                >
+                  {{ enrolling ? 'Redirecting to payment...' : 'Enroll now — ' + formatPrice(course.price_usd) }}
+                </button>
+
                 <p class="enroll-note" *ngIf="!isLoggedIn">
                   <a routerLink="/auth/login">Sign in</a> to enroll in this course.
                 </p>
@@ -105,26 +116,17 @@ import { Course } from '../../../models/course.model';
 
     .course-header {
       background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      padding: 56px 24px;
-      color: #fff;
+      padding: 56px 24px; color: #fff;
     }
     .header-container { max-width: 1000px; margin: 0 auto; }
     .back-link {
-      color: rgba(255,255,255,0.75);
-      text-decoration: none;
-      font-size: 14px;
-      display: inline-block;
-      margin-bottom: 16px;
+      color: rgba(255,255,255,0.75); text-decoration: none;
+      font-size: 14px; display: inline-block; margin-bottom: 16px;
     }
     .back-link:hover { color: #fff; }
     .level-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 14px;
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 14px;
     }
     .level-badge.beginner     { background: #dcfce7; color: #15803d; }
     .level-badge.intermediate { background: #fef9c3; color: #854d0e; }
@@ -135,20 +137,13 @@ import { Course } from '../../../models/course.model';
     .header-meta span { font-size: 14px; opacity: 0.9; }
 
     .course-body {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 48px 24px;
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 40px;
-      align-items: start;
+      max-width: 1000px; margin: 0 auto; padding: 48px 24px;
+      display: grid; grid-template-columns: 1fr 300px;
+      gap: 40px; align-items: start;
     }
     .course-main h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin: 0 0 16px; }
-    .what-youll-learn { margin-bottom: 40px; }
     .learn-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 40px;
     }
     .learn-item { display: flex; gap: 8px; font-size: 14px; color: #475569; }
     .learn-item span { color: #4f46e5; font-weight: 700; flex-shrink: 0; }
@@ -156,43 +151,29 @@ import { Course } from '../../../models/course.model';
     .requirements li { font-size: 15px; color: #475569; margin-bottom: 6px; }
 
     .enroll-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 28px;
-      position: sticky;
-      top: 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 28px; position: sticky; top: 80px;
+      display: flex; flex-direction: column; gap: 20px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
     .enroll-price { text-align: center; }
     .price { font-size: 32px; font-weight: 800; color: #0f172a; }
     .price.free { color: #15803d; }
-    .enroll-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .enroll-features {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 10px;
+    }
     .enroll-features li { font-size: 14px; color: #475569; }
     .success-box {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #15803d;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      color: #15803d; padding: 16px; border-radius: 8px;
+      font-size: 14px; font-weight: 500;
     }
     .btn {
-      padding: 13px 20px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      padding: 13px 20px; border-radius: 8px; font-size: 15px;
+      font-weight: 700; text-decoration: none; border: none;
+      cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     .btn-full { width: 100%; }
     .btn-primary { background: #4f46e5; color: #fff; }
@@ -208,10 +189,10 @@ import { Course } from '../../../models/course.model';
   `]
 })
 export class CourseDetailComponent implements OnInit {
-  course:    Course | null = null;
-  loading    = true;
-  enrolled   = false;
-  enrolling  = false;
+  course:   Course | null = null;
+  loading   = true;
+  enrolled  = false;
+  enrolling = false;
 
   learnItems = [
     'Rust ownership and borrowing',
@@ -233,6 +214,7 @@ export class CourseDetailComponent implements OnInit {
     private router:         Router,
     private coursesService: CoursesService,
     private authService:    AuthService,
+    private paymentService: PaymentService,
   ) {}
 
   get isLoggedIn(): boolean { return this.authService.isLoggedIn; }
@@ -240,21 +222,62 @@ export class CourseDetailComponent implements OnInit {
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug') || '';
     this.coursesService.get(slug).subscribe({
-      next: data => { this.course = data; this.loading = false; },
-      error: ()   => { this.loading = false; }
+      next: data => {
+        this.course  = data;
+        this.loading = false;
+        this.checkEnrollment(data.id);
+      },
+      error: () => { this.loading = false; }
     });
   }
 
-  enroll(): void {
-    if (!this.isLoggedIn) {
-      this.router.navigate(['/auth/login']);
-      return;
-    }
-    if (!this.course) return;
+  checkEnrollment(courseId: string): void {
+    if (!this.isLoggedIn) return;
+    this.coursesService.myEnrollments().subscribe({
+      next: enrollments => {
+        this.enrolled = enrollments.some(e => e.course_id === courseId);
+      },
+      error: () => {}
+    });
+  }
+
+  enrollFree(): void {
+    if (!this.isLoggedIn) { this.router.navigate(['/auth/login']); return; }
+    if (!this.course)     return;
     this.enrolling = true;
     this.coursesService.enroll(this.course.id).subscribe({
-      next: ()  => { this.enrolled = true;  this.enrolling = false; },
-      error: () => { this.enrolling = false; }
+      next: () => { this.enrolled = true; this.enrolling = false; },
+      error: (err) => {
+        if (err.status === 409) this.enrolled = true;
+        this.enrolling = false;
+      }
+    });
+  }
+
+  enrollPaid(): void {
+    if (!this.isLoggedIn) { this.router.navigate(['/auth/login']); return; }
+    if (!this.course)     return;
+
+    const user = this.authService.currentUser;
+    if (!user) { this.router.navigate(['/auth/login']); return; }
+
+    this.enrolling = true;
+
+    this.paymentService.initialize(
+      user.email,
+      this.course.price_usd,
+      'course',
+      this.course.id,
+    ).subscribe({
+      next: result => {
+        localStorage.setItem('pending_course_id', this.course!.id);
+        localStorage.setItem('pending_course_slug', this.course!.slug);
+        window.location.href = result.authorization_url;
+      },
+      error: (err) => {
+        console.error('Payment init failed', err);
+        this.enrolling = false;
+      }
     });
   }
 
