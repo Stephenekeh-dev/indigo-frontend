@@ -74,10 +74,10 @@ import { AuthService } from '../../../services/auth.service';
           </button>
         </form>
 
-        <p class="auth-footer">
-          Already have an account?
-          <a routerLink="/auth/login">Sign in</a>
-        </p>
+          <p class="auth-footer">
+            Already have an account?
+            <a routerLink="/login">Sign in</a>
+          </p>
       </div>
     </div>
   `,

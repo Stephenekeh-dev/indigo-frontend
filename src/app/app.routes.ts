@@ -12,18 +12,39 @@ export const routes: Routes = [
   },
 
   // Auth
-  {
-    path: 'auth/login',
-    loadComponent: () =>
-      import('./features/auth/login/login.component')
-        .then(m => m.LoginComponent),
+ // Auth
+{ 
+  path: 'login',    loadComponent: () =>
+   import('./features/auth/login/login.component')
+   .then(m => m.LoginComponent)
+   },
+{ path: 'register', loadComponent: () => 
+  import('./features/auth/register/register.component')
+  .then(m => m.RegisterComponent)
+ },
+{ 
+  path: 'forgot-password', loadComponent: () => 
+    import('./features/auth/forgot-password/forgot-password.component')
+  .then(m => m.ForgotPasswordComponent)
+ },
+{
+   path: 'reset-password/:token', loadComponent: () => 
+    import('./features/auth/reset-password/reset-password.component')
+   .then(m => m.ResetPasswordComponent) 
   },
-  {
-    path: 'auth/register',
-    loadComponent: () =>
-      import('./features/auth/register/register.component')
-        .then(m => m.RegisterComponent),
-  },
+{
+   path: 'verify-email/:token', loadComponent: () => 
+    import('./features/auth/verify-email/verify-email.component')
+   .then(m => m.VerifyEmailComponent)
+   },
+
+// Keep old auth paths as redirects for backward compatibility
+{ 
+  path: 'auth/login',           redirectTo: 'login' },
+{ path: 'auth/register',        redirectTo: 'register' },
+{ path: 'auth/forgot-password', redirectTo: 'forgot-password' },
+{ path: 'auth/reset-password/:token', redirectTo: 'reset-password/:token' },
+{ path: 'auth/verify-email/:token',   redirectTo: 'verify-email/:token' },
 
   // Services / Booking
   {
@@ -189,6 +210,14 @@ export const routes: Routes = [
     import('./features/admin/admin-shop/admin-shop.component')
       .then(m => m.AdminShopComponent),
 },
+{
+  path: 'newsletter/confirm/:token',
+  loadComponent: () =>
+    import('./features/media/newsletter-confirm/newsletter-confirm.component')
+      .then(m => m.NewsletterConfirmComponent),
+},
+
+
     ]
   },
 

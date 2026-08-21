@@ -22,7 +22,7 @@ export class AdminGuard implements CanActivate {
     return true;
   }
   if (!user) {
-    return this.router.createUrlTree(['/auth/login']);
+   return this.router.createUrlTree(['/login']);
   }
   return this.router.createUrlTree(['/']);
 }

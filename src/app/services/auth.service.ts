@@ -48,7 +48,11 @@ export class AuthService {
 
   login(dto: LoginDto): Observable<AuthResponse> {
     return this.api.post<AuthResponse>('auth/login', dto).pipe(
-      tap(res => this.saveSession(res))
+      tap(res => {
+  this.saveSession(res);
+  this.router.navigate(['/dashboard']);
+})
+      //tap(res => this.saveSession(res))
     );
   }
 

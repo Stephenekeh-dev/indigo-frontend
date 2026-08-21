@@ -34,18 +34,23 @@ import { AuthService } from '../../../services/auth.service';
               autocomplete="email"
             />
           </div>
-
+        
           <div class="field">
+          <div class="field-label-row">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="••••••••"
-              required
-              autocomplete="current-password"
-            />
+            <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
           </div>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+          
 
           <button
             type="submit"
@@ -57,9 +62,9 @@ import { AuthService } from '../../../services/auth.service';
         </form>
 
         <p class="auth-footer">
-          Don't have an account?
-          <a routerLink="/auth/register">Create one free</a>
-        </p>
+        Don't have an account?
+        <a routerLink="/register">Create one free</a>
+      </p>
       </div>
     </div>
   `,
@@ -155,6 +160,20 @@ import { AuthService } from '../../../services/auth.service';
       text-decoration: none;
     }
     .auth-footer a:hover { text-decoration: underline; }
+    
+    .field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.forgot-link {
+  font-size: 13px;
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+.forgot-link:hover { text-decoration: underline; }
+
   `]
 })
 export class LoginComponent {

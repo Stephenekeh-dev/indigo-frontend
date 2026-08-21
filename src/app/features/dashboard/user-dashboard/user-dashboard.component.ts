@@ -17,7 +17,7 @@ import { Order } from '../../../models/product.model';
   template: `
     <div class="dashboard">
 
-      <!-- ── Sidebar ─────────────────────────────── -->
+      <!--  Sidebar  -->
       <aside class="sidebar">
         <div class="user-card">
           <div class="avatar">{{ getInitials() }}</div>
@@ -55,6 +55,13 @@ import { Order } from '../../../models/product.model';
 
         <!-- Overview tab -->
         <div *ngIf="activeTab === 'overview'" class="tab-content">
+
+        <!-- Email verification banner -->
+        <div class="verify-banner" *ngIf="!user?.email_verified">
+          ⚠️ Your email is not verified yet. Check your inbox at
+          <strong>{{ user?.email }}</strong> and click the verification link.
+        </div>
+
           <div class="tab-header">
             <h1>Welcome back, {{ getFirstName() }} 👋</h1>
             <p>Here is a summary of your Indigo activity.</p>
@@ -358,6 +365,16 @@ import { Order } from '../../../models/product.model';
     </div>
   `,
   styles: [`
+        .verify-banner {
+        background: #fef9c3;
+        border: 1px solid #fde047;
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 14px;
+        color: #854d0e;
+        margin-bottom: 20px;
+      }
+
     /* ── Layout ───────────────────────────────── */
     .dashboard {
       display: flex;

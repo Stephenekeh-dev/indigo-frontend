@@ -40,8 +40,8 @@ import { User } from '../../models/user.model';
             <button class="btn btn-outline" (click)="logout()">Logout</button>
           </ng-container>
           <ng-template #guestLinks>
-            <a routerLink="/auth/login"    class="btn btn-ghost">Login</a>
-            <a routerLink="/auth/register" class="btn btn-primary">Get Started</a>
+           <a routerLink="/login"    class="btn btn-ghost">Login</a>
+           <a routerLink="/register" class="btn btn-primary">Get Started</a>
           </ng-template>
         </div>
 
