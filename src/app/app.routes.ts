@@ -1,226 +1,439 @@
+
 import { Routes } from '@angular/router';
+
 import { AuthGuard } from './guards/auth.guard';
+
 import { AdminGuard } from './guards/admin.guard';
 
+import { VerifyPendingComponent } from './features/auth/verify-pending/verify-pending.component';
+
 export const routes: Routes = [
+
   // Landing
+
   {
+
     path: '',
+
     loadComponent: () =>
+
       import('./features/landing/home/home.component')
+
         .then(m => m.HomeComponent),
+
   },
 
   // Auth
+
  // Auth
-{ 
-  path: 'login',    loadComponent: () =>
+
+{
+
+  path: 'login',     loadComponent: () =>
+
    import('./features/auth/login/login.component')
+
    .then(m => m.LoginComponent)
+
    },
-{ path: 'register', loadComponent: () => 
+
+{ path: 'register', loadComponent: () =>
+
   import('./features/auth/register/register.component')
+
   .then(m => m.RegisterComponent)
+
  },
-{ 
-  path: 'forgot-password', loadComponent: () => 
+
+{
+
+  path: 'forgot-password', loadComponent: () =>
+
     import('./features/auth/forgot-password/forgot-password.component')
+
   .then(m => m.ForgotPasswordComponent)
+
  },
+
 {
-   path: 'reset-password/:token', loadComponent: () => 
+
+   path: 'reset-password/:token', loadComponent: () =>
+
     import('./features/auth/reset-password/reset-password.component')
-   .then(m => m.ResetPasswordComponent) 
+
+   .then(m => m.ResetPasswordComponent)
+
   },
+
 {
-   path: 'verify-email/:token', loadComponent: () => 
+
+   path: 'verify-email/:token', loadComponent: () =>
+
     import('./features/auth/verify-email/verify-email.component')
+
    .then(m => m.VerifyEmailComponent)
+
    },
 
 // Keep old auth paths as redirects for backward compatibility
-{ 
+
+{
+
   path: 'auth/login',           redirectTo: 'login' },
+
 { path: 'auth/register',        redirectTo: 'register' },
+
 { path: 'auth/forgot-password', redirectTo: 'forgot-password' },
+
 { path: 'auth/reset-password/:token', redirectTo: 'reset-password/:token' },
+
 { path: 'auth/verify-email/:token',   redirectTo: 'verify-email/:token' },
 
   // Services / Booking
+
   {
+
     path: 'services',
+
     loadComponent: () =>
+
       import('./features/services/services-list/services-list.component')
+
         .then(m => m.ServicesListComponent),
+
   },
+
   {
+
     path: 'services/:slug',
+
     loadComponent: () =>
+
       import('./features/services/service-detail/service-detail.component')
+
         .then(m => m.ServiceDetailComponent),
+
   },
+
   {
+
     path: 'services/:slug/book',
+
     loadComponent: () =>
+
       import('./features/services/booking/booking.component')
+
         .then(m => m.BookingComponent),
+
     canActivate: [AuthGuard],
+
   },
 
   // Education
+
   {
+
     path: 'courses',
+
     loadComponent: () =>
+
       import('./features/education/course-list/course-list.component')
+
         .then(m => m.CourseListComponent),
+
   },
+
   {
+
     path: 'courses/:slug',
+
     loadComponent: () =>
+
       import('./features/education/course-detail/course-detail.component')
+
         .then(m => m.CourseDetailComponent),
+
   },
+
   {
+
     path: 'courses/:slug/learn',
+
     loadComponent: () =>
+
       import('./features/education/course-player/course-player.component')
+
         .then(m => m.CoursePlayerComponent),
+
     canActivate: [AuthGuard],
+
   },
 
   // Shop
+
   {
+
     path: 'shop',
+
     loadComponent: () =>
+
       import('./features/shop/product-list/product-list.component')
+
         .then(m => m.ProductListComponent),
+
   },
+
   {
+
     path: 'shop/cart',
+
     loadComponent: () =>
+
       import('./features/shop/cart/cart.component')
+
         .then(m => m.CartComponent),
+
     canActivate: [AuthGuard],
+
   },
+
   {
+
     path: 'shop/checkout',
+
     loadComponent: () =>
+
       import('./features/shop/checkout/checkout.component')
+
         .then(m => m.CheckoutComponent),
+
     canActivate: [AuthGuard],
+
   },
 
   // Blog
+
   {
+
     path: 'blog',
+
     loadComponent: () =>
+
       import('./features/media/blog-list/blog-list.component')
+
         .then(m => m.BlogListComponent),
+
   },
+
   {
+
     path: 'blog/:slug',
+
     loadComponent: () =>
+
       import('./features/media/blog-post/blog-post.component')
+
         .then(m => m.BlogPostComponent),
+
   },
 
   // Community
+
   {
+
     path: 'community',
+
     loadComponent: () =>
+
       import('./features/community/events-list/events-list.component')
+
         .then(m => m.EventsListComponent),
+
   },
+
   {
+
     path: 'community/:slug',
+
     loadComponent: () =>
+
       import('./features/community/event-detail/event-detail.component')
+
         .then(m => m.EventDetailComponent),
+
   },
 
   // Blockchain
+
   {
+
     path: 'blockchain',
+
     loadComponent: () =>
+
       import('./features/blockchain/blockchain-list/blockchain-list.component')
+
         .then(m => m.BlockchainListComponent),
+
   },
+
   {
+
     path: 'blockchain/:slug',
+
     loadComponent: () =>
+
       import('./features/blockchain/blockchain-detail/blockchain-detail.component')
+
         .then(m => m.BlockchainDetailComponent),
+
+  },
+
+  // Newsletter confirmation
+
+  {
+
+    path: 'newsletter/confirm/:token',
+
+    loadComponent: () =>
+
+      import('./features/media/newsletter-confirm/newsletter-confirm.component')
+
+        .then(m => m.NewsletterConfirmComponent),
+
+  },
+
+  // Email verification pending
+
+  {
+
+    path: 'verify-pending',
+
+    component: VerifyPendingComponent,
+
   },
 
   // Dashboard (protected)
+
   {
+
     path: 'dashboard',
+
     loadComponent: () =>
+
       import('./features/dashboard/user-dashboard/user-dashboard.component')
+
         .then(m => m.UserDashboardComponent),
+
     canActivate: [AuthGuard],
+
   },
 
   // Admin (protected — admin role only)
-  {
-    path: 'admin',
-    loadComponent: () =>
-      import('./features/admin/admin-layout/admin-layout.component')
-        .then(m => m.AdminLayoutComponent),
-    canActivate: [AdminGuard],
-    children: [
-      {
-        path: '',
-        redirectTo: 'services',
-        pathMatch: 'full'
-      },
-      {
-        path: 'services',
-        loadComponent: () =>
-          import('./features/admin/admin-services/admin-services.component')
-            .then(m => m.AdminServicesComponent),
-      },
-      {
-        path: 'courses',
-        loadComponent: () =>
-          import('./features/admin/admin-courses/admin-courses.component')
-            .then(m => m.AdminCoursesComponent),
-      },
-      {
-        path: 'users',
-        loadComponent: () =>
-          import('./features/admin/admin-users/admin-users.component')
-            .then(m => m.AdminUsersComponent),
-      },
-      {
-        path: 'bookings',
-        loadComponent: () =>
-          import('./features/admin/admin-bookings/admin-bookings.component')
-            .then(m => m.AdminBookingsComponent),
-      },
-            {
-        path: 'media',
-        loadComponent: () =>
-          import('./features/admin/admin-media/admin-media.component')
-            .then(m => m.AdminMediaComponent),
-      },
-      {
-  path: 'shop',
-  loadComponent: () =>
-    import('./features/admin/admin-shop/admin-shop.component')
-      .then(m => m.AdminShopComponent),
-},
-{
-  path: 'newsletter/confirm/:token',
-  loadComponent: () =>
-    import('./features/media/newsletter-confirm/newsletter-confirm.component')
-      .then(m => m.NewsletterConfirmComponent),
-},
 
+  {
+
+    path: 'admin',
+
+    loadComponent: () =>
+
+      import('./features/admin/admin-layout/admin-layout.component')
+
+        .then(m => m.AdminLayoutComponent),
+
+    canActivate: [AdminGuard],
+
+    children: [
+
+      {
+
+        path: '',
+
+        redirectTo: 'services',
+
+        pathMatch: 'full'
+
+      },
+
+      {
+
+        path: 'services',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-services/admin-services.component')
+
+            .then(m => m.AdminServicesComponent),
+
+      },
+
+      {
+
+        path: 'courses',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-courses/admin-courses.component')
+
+            .then(m => m.AdminCoursesComponent),
+
+      },
+
+      {
+
+        path: 'users',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-users/admin-users.component')
+
+            .then(m => m.AdminUsersComponent),
+
+      },
+
+      {
+
+        path: 'bookings',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-bookings/admin-bookings.component')
+
+            .then(m => m.AdminBookingsComponent),
+
+      },
+
+      {
+
+        path: 'media',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-media/admin-media.component')
+
+            .then(m => m.AdminMediaComponent),
+
+      },
+
+      {
+
+        path: 'shop',
+
+        loadComponent: () =>
+
+          import('./features/admin/admin-shop/admin-shop.component')
+
+            .then(m => m.AdminShopComponent),
+
+      },
 
     ]
+
   },
 
   // Wildcard — must be last
+
   { path: '**', redirectTo: '' },
+
 ];
+

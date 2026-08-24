@@ -196,7 +196,7 @@ export class RegisterComponent {
       email:     this.email,
       password:  this.password
     }).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/verify-pending']),
       error: (err) => {
         this.error   = err?.error?.error?.message || 'Registration failed';
         this.loading = false;
