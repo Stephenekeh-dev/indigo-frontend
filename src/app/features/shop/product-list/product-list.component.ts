@@ -14,9 +14,17 @@ import { AuthService } from '../../../services/auth.service';
       <div class="page-header">
         <h1>Indigo Shop</h1>
         <p>Ebooks, templates, tools, and merch to accelerate your Rust journey.</p>
+       
       </div>
 
       <div class="container">
+      <!-- Cart bar — shown when items are in cart -->
+    <div class="cart-bar" *ngIf="cartItemCount > 0">
+      <span>🛒 {{ cartItemCount }} item(s) in your cart</span>
+      <a routerLink="/shop/cart" class="btn btn-cart">View Cart & Checkout →</a>
+    </div>
+
+
         <div class="loading" *ngIf="loading">Loading products...</div>
 
         <div class="grid" *ngIf="!loading">
@@ -77,7 +85,34 @@ import { AuthService } from '../../../services/auth.service';
     .page-header p  { font-size: 18px; opacity: 0.85; margin: 0; }
     .container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
     .loading { text-align: center; color: #64748b; padding: 48px; }
-
+     
+  .cart-bar {
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+  color: #4f46e5;
+  padding: 14px 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.btn-cart {
+  background: #4f46e5;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.btn-cart:hover { background: #4338ca; }
+.btn { padding: 8px 18px; border-radius: 8px; font-size: 14px;
+  font-weight: 700; text-decoration: none; border: none; cursor: pointer; }
+.btn-primary { background: #fff; color: #4f46e5; }
+.btn-primary:hover { background: #f1f5f9; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -163,15 +198,16 @@ import { AuthService } from '../../../services/auth.service';
   `]
 })
 export class ProductListComponent implements OnInit {
-  products:  Product[] = [];
-  loading  = true;
-  addedIds: string[]   = [];
+  products:     Product[] = [];
+  loading       = true;
+  addedIds:     string[]  = [];
+  cartItemCount = 0;
 
   placeholders = [
-    { emoji: '📖', type: 'ebook',    title: 'Rust in Production',              desc: 'A practical guide to running Rust services at scale.',              price: '$29'  },
-    { emoji: '🔧', type: 'template', title: 'Axum API Starter Template',       desc: 'Production-ready Rust REST API with auth, DB, and tests included.', price: '$19'  },
-    { emoji: '👕', type: 'merch',    title: 'Indigo Rust Developer T-Shirt',   desc: 'Premium cotton tee with the Indigo logo and Rust crab.',            price: '$35'  },
-    { emoji: '📦', type: 'bundle',   title: 'Complete Rust Course Bundle',     desc: 'All 10 courses for the price of 3. Lifetime access included.',      price: '$149' },
+    { emoji: '📖', type: 'ebook',    title: 'Rust in Production',            desc: 'A practical guide to running Rust services at scale.',              price: '$29'  },
+    { emoji: '🔧', type: 'template', title: 'Axum API Starter Template',     desc: 'Production-ready Rust REST API with auth, DB, and tests included.', price: '$19'  },
+    { emoji: '👕', type: 'merch',    title: 'Indigo Developer T-Shirt',      desc: 'Premium cotton tee with the Indigo logo and Rust crab.',            price: '$35'  },
+    { emoji: '📦', type: 'bundle',   title: 'Complete Rust Course Bundle',   desc: 'All courses for the price of 3. Lifetime access included.',         price: '$149' },
   ];
 
   constructor(
@@ -188,15 +224,25 @@ export class ProductListComponent implements OnInit {
       },
       error: () => { this.loading = false; }
     });
+
+    if (this.authService.isLoggedIn) {
+      this.shopService.getCart().subscribe({
+        next: items => { this.cartItemCount = items.length; },
+        error: () => {}
+      });
+    }
   }
 
   addToCart(product: Product): void {
     if (!this.authService.isLoggedIn) {
-      window.location.href = '/auth/login';
+      window.location.href = '/login';
       return;
     }
     this.shopService.addToCart(product.id).subscribe({
-      next: () => this.addedIds.push(product.id),
+      next: () => {
+        this.addedIds.push(product.id);
+        this.cartItemCount++;
+      },
       error: () => {}
     });
   }

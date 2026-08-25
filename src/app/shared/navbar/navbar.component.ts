@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
-
+import { ShopService } from '../../services/shop.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -38,6 +38,10 @@ import { User } from '../../models/user.model';
             Admin
           </a>
             <button class="btn btn-outline" (click)="logout()">Logout</button>
+          <a routerLink="/shop/cart" class="cart-link" *ngIf="isLoggedIn">
+          Cart
+          <span class="cart-count" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </a>
           </ng-container>
           <ng-template #guestLinks>
            <a routerLink="/login"    class="btn btn-ghost">Login</a>
@@ -121,6 +125,27 @@ import { User } from '../../models/user.model';
       border: none;
       transition: all 0.2s;
     }
+      .cart-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.cart-link:hover { color: #e2e8f0; background: rgba(99,102,241,0.15); }
+.cart-count {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
     .btn-ghost {
       color: #94a3b8;
       background: transparent;
@@ -174,21 +199,34 @@ import { User } from '../../models/user.model';
 })
 export class NavbarComponent implements OnInit {
   currentUser: User | null = null;
-  menuOpen = false;
+  menuOpen    = false;
+  cartCount   = 0;
 
-  constructor(private authService: AuthService) {}
+  get isLoggedIn(): boolean { return !!this.currentUser; }
+
+  constructor(
+    private authService: AuthService,
+    private shopService: ShopService,
+  ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      if (user) {
+        this.shopService.getCart().subscribe({
+          next: items => { this.cartCount = items.length; },
+          error: () => {}
+        });
+      } else {
+        this.cartCount = 0;
+      }
     });
   }
 
   logout(): void {
-    this.authService.logout();
-  }
-
+     this.authService.logout(); 
+    }
   toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
-  }
+     this.menuOpen = !this.menuOpen;
+     }
 }
