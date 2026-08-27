@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.indigo.dev/api/v1',
+  apiUrl: 'https://api.yourdomain.com/api/v1',
 };
