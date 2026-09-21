@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-media',
@@ -18,6 +20,44 @@ import { AdminService } from '../../../services/admin.service';
           + New Post
         </button>
       </div>
+      
+      <!-- Newsletter broadcast -->
+<div class="newsletter-card">
+  <h2>📬 Send Newsletter</h2>
+  <p>Send an email to all {{ subscriberCount }} subscribers.</p>
+
+  <div class="form-grid">
+    <div class="field full">
+      <label>Subject *</label>
+      <input
+        type="text"
+        [(ngModel)]="broadcast.subject"
+        placeholder="e.g. Rust Weekly — Issue #12"
+      />
+    </div>
+    <div class="field full">
+      <label>Content *</label>
+      <textarea
+        [(ngModel)]="broadcast.content"
+        rows="8"
+        placeholder="Write your newsletter content here...
+Use blank lines between paragraphs."
+      ></textarea>
+    </div>
+  </div>
+
+  <div class="broadcast-actions">
+    <div class="success-msg" *ngIf="broadcastSuccess">{{ broadcastSuccess }}</div>
+    <div class="error-msg"   *ngIf="broadcastError">{{ broadcastError }}</div>
+    <button
+      class="btn btn-primary"
+      (click)="sendBroadcast()"
+      [disabled]="broadcasting"
+    >
+      {{ broadcasting ? 'Sending...' : 'Send to all subscribers →' }}
+    </button>
+  </div>
+</div>
 
       <!-- Create / Edit form -->
       <div class="form-card" *ngIf="showForm">
@@ -136,6 +176,16 @@ import { AdminService } from '../../../services/admin.service';
     }
     .page-head h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
     .page-head p  { font-size: 14px; color: #64748b; margin: 0; }
+    .newsletter-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.newsletter-card h2 { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 6px; }
+.newsletter-card p  { font-size: 14px; color: #64748b; margin: 0 0 20px; }
+.broadcast-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
     .form-card {
       background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
@@ -246,11 +296,26 @@ export class AdminMediaComponent implements OnInit {
     status:     'draft',
     tags_input: '',
   };
+ 
+  subscriberCount = 0;
+broadcasting    = false;
+broadcastSuccess = '';
+broadcastError   = '';
 
-  constructor(private adminService: AdminService) {}
+broadcast = {
+  subject: '',
+  content: '',
+};
+  constructor(private adminService: AdminService, 
+  private http:         HttpClient,) {}
 
   ngOnInit(): void {
     this.loadPosts();
+    this.http.get<any[]>(`${environment.apiUrl}/media/newsletter/subscribers`)
+  .subscribe({
+    next: subs => { this.subscriberCount = subs.length; },
+    error: () => {}
+  });
   }
 
   loadPosts(): void {
@@ -366,6 +431,29 @@ export class AdminMediaComponent implements OnInit {
       }
     });
   }
+
+sendBroadcast(): void {
+  if (!this.broadcast.subject || !this.broadcast.content) return;
+  this.broadcasting    = true;
+  this.broadcastSuccess = '';
+  this.broadcastError   = '';
+
+  this.http.post<any>(
+    `${environment.apiUrl}/media/newsletter/broadcast`,
+    this.broadcast
+  ).subscribe({
+    next: res => {
+      this.broadcastSuccess = res.message;
+      this.broadcasting     = false;
+      this.broadcast        = { subject: '', content: '' };
+    },
+    error: e => {
+      this.broadcastError = e?.error?.message || 'Failed to send newsletter';
+      this.broadcasting   = false;
+    }
+  });
+}  
+
 
   getPostTitle(slug: string | null): string {
     if (!slug) return '';
